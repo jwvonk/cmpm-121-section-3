@@ -10,8 +10,8 @@ export default class Play extends Phaser.Scene {
   starfield?: Phaser.GameObjects.TileSprite;
   spinner?: Phaser.GameObjects.Shape;
   enemy?: Phaser.GameObjects.Shape;
-
-  launched: boolean = false;
+  launched = false;
+  origin?: { x: number; y: number };
 
   strafeSpeed = 0.5;
 
@@ -33,6 +33,10 @@ export default class Play extends Phaser.Scene {
     this.fire = this.#addKey("F");
     this.left = this.#addKey("LEFT");
     this.right = this.#addKey("RIGHT");
+    this.origin = {
+      x: (this.game.config.width as number) / 2,
+      y: (this.game.config.height as number) - 50,
+    };
 
     this.starfield = this.add
       .tileSprite(
@@ -45,8 +49,8 @@ export default class Play extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.spinner = this.add.rectangle(
-      (this.game.config.width as number) / 2,
-      (this.game.config.height as number) - 50,
+      this.origin.x,
+      this.origin.y,
       50,
       50,
       0xff0000,
@@ -59,6 +63,13 @@ export default class Play extends Phaser.Scene {
       50,
       0xffffff,
     );
+
+    this.tweens.add({
+      targets: this.enemy,
+      x: { from: (this.game.config.width as number) + 50, to: -50 },
+      duration: 5000,
+      loop: -1,
+    });
   }
 
   update(_timeMs: number, delta: number) {
@@ -79,13 +90,16 @@ export default class Play extends Phaser.Scene {
         duration: 2000,
         ease: Phaser.Math.Easing.Sine.Out,
         onComplete: () => {
-          this.spinner?.setPosition(
-            (this.game.config.width as number) / 2,
-            (this.game.config.height as number) - 50,
-          );
+          this.spinner?.setPosition(this.origin!.x, this.origin!.y);
           this.launched = false;
         },
       });
+    }
+    if (
+      Math.abs(this.spinner!.x - this.enemy!.x) < 50 &&
+      Math.abs(this.spinner!.y - this.enemy!.y) < 50
+    ) {
+      this.enemy?.destroy();
     }
   }
 }
