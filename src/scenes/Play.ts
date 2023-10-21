@@ -56,20 +56,7 @@ export default class Play extends Phaser.Scene {
       0xff0000,
     );
 
-    this.enemy = this.add.rectangle(
-      this.game.config.width as number,
-      100,
-      50,
-      50,
-      0xffffff,
-    );
-
-    this.tweens.add({
-      targets: this.enemy,
-      x: { from: (this.game.config.width as number) + 50, to: -50 },
-      duration: 5000,
-      loop: -1,
-    });
+    this.enemy = this.addEnemy();
   }
 
   update(_timeMs: number, delta: number) {
@@ -100,6 +87,25 @@ export default class Play extends Phaser.Scene {
       Math.abs(this.spinner!.y - this.enemy!.y) < 50
     ) {
       this.enemy?.destroy();
+      this.enemy = this.addEnemy();
     }
+  }
+
+  addEnemy() {
+    const enemy = this.add.rectangle(
+      this.game.config.width as number,
+      100,
+      50,
+      50,
+      0xffffff,
+    );
+
+    this.tweens.add({
+      targets: enemy,
+      x: { from: (this.game.config.width as number) + 50, to: -50 },
+      duration: 5000,
+      loop: -1,
+    });
+    return enemy;
   }
 }
